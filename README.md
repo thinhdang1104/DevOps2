@@ -3,7 +3,7 @@
 ## Architecture
 - Frontend: React + Vite
 - Backend: Node.js + Express
-- Database: PostgreSQL
+- Database: MySQL
 
 ## Mandatory Endpoint
 - GET /api/health returns { "ok": true }
@@ -39,6 +39,7 @@
 ### URLs
 - Frontend: http://localhost:8080
 - Backend health: http://localhost:3000/api/health
+- MySQL: localhost:3307
 
 ## CI
 GitHub Actions pipeline runs on push and pull request.
@@ -51,15 +52,20 @@ Workflow file: .github/workflows/ci.yml
 
 ## Deploy Production On Render
 This repo includes render.yaml for one-click blueprint deploy.
+For MySQL on Render, use an external MySQL provider and set DATABASE_URL manually.
 
-### A. Deploy backend + database + frontend
+### A. Deploy backend + frontend
 1. Go to Render dashboard
 2. New + -> Blueprint
 3. Connect GitHub repo: thinhdang1104/DevOps2
 4. Select branch: main
 5. Deploy blueprint
 
-### B. Update frontend API URL after first deploy
+### B. Set backend DATABASE_URL (MySQL)
+Use MySQL connection string format:
+- mysql://<user>:<password>@<host>:3306/<database>
+
+### C. Update frontend API URL after first deploy
 After backend service is created, copy backend public URL.
 Set frontend env var:
 - VITE_API_BASE_URL = https://<your-backend-service>.onrender.com/api
