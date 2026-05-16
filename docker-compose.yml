@@ -1,19 +1,20 @@
 services:
   db:
-    image: postgres:16-alpine
+    image: mysql:8.4
     container_name: expense-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-expense_tracker}
-      POSTGRES_USER: ${POSTGRES_USER:-expense_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-expense_pass}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-expense_tracker}
+      MYSQL_USER: ${MYSQL_USER:-expense_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-expense_pass}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_pass}
     ports:
-      - "5432:5432"
+      - "3307:3306"
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
       - ./infra/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-expense_user} -d ${POSTGRES_DB:-expense_tracker}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p${MYSQL_ROOT_PASSWORD:-root_pass}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,7 +29,7 @@ services:
       - .env
     environment:
       PORT: ${PORT:-3000}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://expense_user:expense_pass@db:5432/expense_tracker}
+      DATABASE_URL: mysql://${MYSQL_USER:-expense_user}:${MYSQL_PASSWORD:-expense_pass}@db:3306/${MYSQL_DATABASE:-expense_tracker}
     ports:
       - "3000:3000"
     depends_on:
@@ -49,4 +50,4 @@ services:
       - backend
 
 volumes:
-  pg_data:
+  mysql_data:

@@ -1,9 +1,3 @@
-databases:
-  - name: expense-db
-    databaseName: expense_tracker
-    user: expense_user
-    plan: free
-
 services:
   - type: web
     name: expense-backend
@@ -17,9 +11,7 @@ services:
       - key: NODE_VERSION
         value: 20
       - key: DATABASE_URL
-        fromDatabase:
-          name: expense-db
-          property: connectionString
+        sync: false
 
   - type: web
     name: expense-frontend

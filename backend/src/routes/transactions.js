@@ -5,10 +5,10 @@ const router = express.Router();
 
 router.get("/", async (_req, res, next) => {
   try {
-    const result = await pool.query(
+    const [rows] = await pool.query(
       "SELECT id, type, amount, description, created_at FROM transactions ORDER BY created_at DESC"
     );
-    res.json(result.rows);
+    res.json(rows);
   } catch (error) {
     next(error);
   }
@@ -16,15 +16,15 @@ router.get("/", async (_req, res, next) => {
 
 router.get("/summary", async (_req, res, next) => {
   try {
-    const result = await pool.query(`
+    const [rows] = await pool.query(`
       SELECT
         COALESCE(SUM(CASE WHEN type = 'INCOME' THEN amount END), 0) AS total_income,
         COALESCE(SUM(CASE WHEN type = 'EXPENSE' THEN amount END), 0) AS total_expense
       FROM transactions
     `);
 
-    const totalIncome = Number(result.rows[0].total_income || 0);
-    const totalExpense = Number(result.rows[0].total_expense || 0);
+    const totalIncome = Number(rows[0].total_income || 0);
+    const totalExpense = Number(rows[0].total_expense || 0);
 
     res.json({
       totalIncome,
@@ -52,12 +52,17 @@ router.post("/", async (req, res, next) => {
       return res.status(400).json({ message: "description is required" });
     }
 
-    const result = await pool.query(
-      "INSERT INTO transactions(type, amount, description) VALUES ($1, $2, $3) RETURNING id, type, amount, description, created_at",
+    const [result] = await pool.query(
+      "INSERT INTO transactions(type, amount, description) VALUES (?, ?, ?)",
       [type, amount, description.trim()]
     );
 
-    return res.status(201).json(result.rows[0]);
+    const [rows] = await pool.query(
+      "SELECT id, type, amount, description, created_at FROM transactions WHERE id = ?",
+      [result.insertId]
+    );
+
+    return res.status(201).json(rows[0]);
   } catch (error) {
     return next(error);
   }
@@ -70,8 +75,8 @@ router.delete("/:id", async (req, res, next) => {
       return res.status(400).json({ message: "invalid id" });
     }
 
-    const result = await pool.query("DELETE FROM transactions WHERE id = $1", [id]);
-    if (result.rowCount === 0) {
+    const [result] = await pool.query("DELETE FROM transactions WHERE id = ?", [id]);
+    if (result.affectedRows === 0) {
       return res.status(404).json({ message: "transaction not found" });
     }
 
