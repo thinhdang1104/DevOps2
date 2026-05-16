@@ -1,0 +1,86 @@
+:root {
+  font-family: "Segoe UI", sans-serif;
+  color: #101828;
+  background: #f6f8fb;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.health {
+  margin-top: -8px;
+  color: #155eef;
+}
+
+.error {
+  color: #b42318;
+  font-weight: 600;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr auto;
+  gap: 8px;
+}
+
+.form input,
+.form select,
+.form button {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #d0d5dd;
+}
+
+.form button {
+  background: #0f766e;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f2f4f7;
+}
+
+.item button {
+  border: none;
+  background: #fee4e2;
+  color: #912018;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .form {
+    grid-template-columns: 1fr;
+  }
+}
