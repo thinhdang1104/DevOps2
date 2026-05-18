@@ -1,5 +1,16 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
 
+function toQueryString(filters = {}) {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value).trim() !== "") {
+      params.append(key, value);
+    }
+  });
+  const query = params.toString();
+  return query ? `?${query}` : "";
+}
+
 export async function getHealth() {
   const response = await fetch(`${API_BASE}/health`);
   if (!response.ok) {
@@ -8,18 +19,26 @@ export async function getHealth() {
   return response.json();
 }
 
-export async function getTransactions() {
-  const response = await fetch(`${API_BASE}/transactions`);
+export async function getTransactions(filters = {}) {
+  const response = await fetch(`${API_BASE}/transactions${toQueryString(filters)}`);
   if (!response.ok) {
     throw new Error("Cannot fetch transactions");
   }
   return response.json();
 }
 
-export async function getSummary() {
-  const response = await fetch(`${API_BASE}/transactions/summary`);
+export async function getSummary(filters = {}) {
+  const response = await fetch(`${API_BASE}/transactions/summary${toQueryString(filters)}`);
   if (!response.ok) {
     throw new Error("Cannot fetch summary");
+  }
+  return response.json();
+}
+
+export async function getMonthlySummary(year) {
+  const response = await fetch(`${API_BASE}/transactions/monthly${toQueryString({ year })}`);
+  if (!response.ok) {
+    throw new Error("Cannot fetch monthly summary");
   }
   return response.json();
 }
