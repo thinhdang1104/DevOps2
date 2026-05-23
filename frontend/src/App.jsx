@@ -67,6 +67,9 @@ function App() {
 
   const incomeCount = transactions.filter((item) => item.type === "INCOME").length;
   const expenseCount = transactions.filter((item) => item.type === "EXPENSE").length;
+  const totalFlow = summary.totalIncome + summary.totalExpense;
+  const incomeShare = totalFlow > 0 ? Math.round((summary.totalIncome / totalFlow) * 100) : 0;
+  const expenseShare = totalFlow > 0 ? Math.round((summary.totalExpense / totalFlow) * 100) : 0;
 
   async function refreshData(activeFilters = filters) {
     const targetYear = isValidYear(yearInput) ? Number(yearInput) : currentYear;
@@ -143,7 +146,7 @@ function App() {
   async function onApplyYear() {
     setError("");
     if (!isValidYear(yearInput)) {
-      setError("Year must be from 2000 to 2100");
+      setError("N\u0103m ph\u1ea3i t\u1eeb 2000 \u0111\u1ebfn 2100");
       return;
     }
 
@@ -173,11 +176,11 @@ function App() {
 
       <header className="topbar">
         <div>
-          <p className="eyebrow">Personal Finance Workspace</p>
-          <h1>Quan ly chi tieu</h1>
+          <p className="eyebrow">{"B\u1ea3ng \u0111i\u1ec1u khi\u1ec3n t\u00e0i ch\u00ednh c\u00e1 nh\u00e2n"}</p>
+          <h1>{"Qu\u1ea3n l\u00fd chi ti\u00eau"}</h1>
         </div>
         <div className="topbar-actions">
-          <div className="top-pill">{transactions.length} giao dich</div>
+          <div className="top-pill">{transactions.length} {"giao d\u1ecbch"}</div>
           <div className="top-pill">{monthly.year}</div>
         </div>
       </header>
@@ -185,15 +188,15 @@ function App() {
       <section className="hero">
         <div className="dashboard-cards">
           <article className="stat-card income">
-            <span>Tong thu</span>
+            <span>{"T\u1ed5ng thu"}</span>
             <strong>{formatCurrency(summary.totalIncome)}</strong>
           </article>
           <article className="stat-card expense">
-            <span>Tong chi</span>
+            <span>{"T\u1ed5ng chi"}</span>
             <strong>{formatCurrency(summary.totalExpense)}</strong>
           </article>
           <article className="stat-card balance">
-            <span>So du</span>
+            <span>{"S\u1ed1 d\u01b0"}</span>
             <strong>{formatCurrency(summary.balance)}</strong>
           </article>
         </div>
@@ -205,7 +208,7 @@ function App() {
         <div className="workspace-left">
           <section className="card card-split">
             <div className="card-pane">
-              <h2 className="section-title">Them giao dich</h2>
+              <h2 className="section-title">{"Th\u00eam giao d\u1ecbch"}</h2>
               <form className="form" onSubmit={onSubmit}>
                 <select
                   value={form.type}
@@ -218,43 +221,43 @@ function App() {
                   type="number"
                   min="0.01"
                   step="0.01"
-                  placeholder="So tien"
+                  placeholder={"S\u1ed1 ti\u1ec1n"}
                   value={form.amount}
                   onChange={(e) => setForm((prev) => ({ ...prev, amount: e.target.value }))}
                   required
                 />
                 <input
                   type="text"
-                  placeholder="Danh muc (VD: AN_UONG)"
+                  placeholder={"Danh m\u1ee5c (VD: AN_UONG)"}
                   value={form.category}
                   onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
                   required
                 />
                 <input
                   type="text"
-                  placeholder="Mo ta"
+                  placeholder={"M\u00f4 t\u1ea3"}
                   value={form.description}
                   onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                   required
                 />
-                <button type="submit">Them giao dich</button>
+                <button type="submit">{"Th\u00eam giao d\u1ecbch"}</button>
               </form>
             </div>
 
             <div className="card-pane">
-              <h2 className="section-title">Bo loc</h2>
+              <h2 className="section-title">{"B\u1ed9 l\u1ecdc"}</h2>
               <form className="filter-form" onSubmit={onApplyFilters}>
                 <select
                   value={filters.type}
                   onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value }))}
                 >
-                  <option value="ALL">Tat ca loai</option>
+                  <option value="ALL">{"T\u1ea5t c\u1ea3 lo\u1ea1i"}</option>
                   <option value="INCOME">Thu</option>
                   <option value="EXPENSE">Chi</option>
                 </select>
                 <input
                   type="text"
-                  placeholder="Danh muc"
+                  placeholder={"Danh m\u1ee5c"}
                   value={filters.category}
                   onChange={(e) => setFilters((prev) => ({ ...prev, category: e.target.value }))}
                 />
@@ -268,9 +271,9 @@ function App() {
                   value={filters.endDate}
                   onChange={(e) => setFilters((prev) => ({ ...prev, endDate: e.target.value }))}
                 />
-                <button type="submit">Ap dung loc</button>
+                <button type="submit">{"\u00c1p d\u1ee5ng l\u1ecdc"}</button>
                 <button type="button" className="secondary" onClick={onResetFilters}>
-                  Dat lai
+                  {"\u0110\u1eb7t l\u1ea1i"}
                 </button>
               </form>
             </div>
@@ -278,15 +281,15 @@ function App() {
 
           <section className="card transactions-card">
             <div className="section-row">
-              <h2 className="section-title">Danh sach giao dich</h2>
-              <span className="transaction-count">{transactions.length} muc</span>
+              <h2 className="section-title">{"Danh s\u00e1ch giao d\u1ecbch"}</h2>
+              <span className="transaction-count">{transactions.length} {"m\u1ee5c"}</span>
             </div>
             <div className="transaction-meta">
               <span>Thu: {incomeCount}</span>
               <span>Chi: {expenseCount}</span>
             </div>
             {transactions.length === 0 ? (
-              <p className="empty-state">Chua co giao dich nao. Hay them giao dich dau tien.</p>
+              <p className="empty-state">{"Ch\u01b0a c\u00f3 giao d\u1ecbch n\u00e0o. H\u00e3y th\u00eam giao d\u1ecbch \u0111\u1ea7u ti\u00ean."}</p>
             ) : (
               <ul className="list">
                 {transactions.map((item) => (
@@ -301,7 +304,7 @@ function App() {
                       </p>
                     </div>
                     <button type="button" onClick={() => onDelete(item.id)}>
-                      Xoa
+                      {"X\u00f3a"}
                     </button>
                   </li>
                 ))}
@@ -312,19 +315,28 @@ function App() {
 
         <aside className="workspace-right">
           <section className="card summary-card">
-            <h2 className="section-title">Tong quan</h2>
+            <h2 className="section-title">{"T\u1ed5ng quan"}</h2>
             <div className="summary-grid">
-              <div>
+              <div className="summary-cell summary-income">
                 <span className="summary-label">Thu</span>
                 <strong>{formatCurrency(summary.totalIncome)}</strong>
+                <small className="summary-hint">{incomeShare}% {"d\u00f2ng ti\u1ec1n"}</small>
+                <span className="summary-meter">
+                  <span style={{ width: `${incomeShare}%` }} />
+                </span>
               </div>
-              <div>
+              <div className="summary-cell summary-expense">
                 <span className="summary-label">Chi</span>
                 <strong>{formatCurrency(summary.totalExpense)}</strong>
+                <small className="summary-hint">{expenseShare}% {"d\u00f2ng ti\u1ec1n"}</small>
+                <span className="summary-meter">
+                  <span style={{ width: `${expenseShare}%` }} />
+                </span>
               </div>
-              <div>
-                <span className="summary-label">So du</span>
+              <div className="summary-cell summary-balance">
+                <span className="summary-label">{"S\u1ed1 d\u01b0"}</span>
                 <strong className={sectionAmountClass(summary.balance)}>{formatCurrency(summary.balance)}</strong>
+                <small className="summary-hint">{"Ch\u00eanh l\u1ec7ch hi\u1ec7n t\u1ea1i"}</small>
               </div>
             </div>
           </section>
@@ -332,11 +344,11 @@ function App() {
           <section className="card monthly-card">
             <div className="section-row">
               <div>
-                <h2 className="section-title">Thong ke theo thang</h2>
+                <h2 className="section-title">{"Th\u1ed1ng k\u00ea theo th\u00e1ng"}</h2>
               </div>
               <div className="year-controls">
                 <label className="year-field" htmlFor="year">
-                  Nam
+                  {"N\u0103m"}
                 </label>
                 <input
                   id="year"
@@ -349,13 +361,13 @@ function App() {
                   onBlur={onApplyYear}
                 />
                 <button type="button" className="year-apply" onClick={onApplyYear}>
-                  Xem
+                  {"Xem"}
                 </button>
               </div>
             </div>
             <div className="chart-wrapper">
               {monthly.data.length === 0 ? (
-                <p className="empty-state">Chua co du lieu thong ke theo thang.</p>
+                <p className="empty-state">{"Ch\u01b0a c\u00f3 d\u1eef li\u1ec7u th\u1ed1ng k\u00ea theo th\u00e1ng."}</p>
               ) : (
                 monthly.data.map((item) => {
                   const maxValue = Math.max(

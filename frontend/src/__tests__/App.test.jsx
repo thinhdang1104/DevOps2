@@ -5,6 +5,6 @@ import App from "../App";
 describe("App", () => {
   it("renders title", () => {
     render(<App />);
-    expect(screen.getByText("Quan ly chi tieu")).toBeInTheDocument();
+    expect(screen.getByText("Quản lý chi tiêu")).toBeInTheDocument();
   });
 });
