@@ -43,6 +43,12 @@ function badgeClass(type) {
   return type === "INCOME" ? "badge badge-income" : "badge badge-expense";
 }
 
+function sectionAmountClass(value) {
+  if (value > 0) return "amount-positive";
+  if (value < 0) return "amount-negative";
+  return "amount-neutral";
+}
+
 function isValidYear(value) {
   const year = Number(value);
   return Number.isInteger(year) && year >= 2000 && year <= 2100;
@@ -58,6 +64,9 @@ function App() {
   const [filters, setFilters] = useState(initialFilters);
   const [form, setForm] = useState(initialForm);
   const [error, setError] = useState("");
+
+  const incomeCount = transactions.filter((item) => item.type === "INCOME").length;
+  const expenseCount = transactions.filter((item) => item.type === "EXPENSE").length;
 
   async function refreshData(activeFilters = filters) {
     const targetYear = isValidYear(yearInput) ? Number(yearInput) : currentYear;
@@ -158,25 +167,33 @@ function App() {
 
   return (
     <main className="container">
-      <section className="hero">
-        <div className="hero-copy">
-          <h1>Expense Tracker</h1>
-          <p className={`health ${health === "ok" ? "health-ok" : "health-down"}`}>
-            API health: {health}
-          </p>
-        </div>
+      <div className={`floating-health ${health === "ok" ? "health-ok" : "health-down"}`}>
+        API Status: {health === "ok" ? "Online" : health === "down" ? "Offline" : "Checking"}
+      </div>
 
+      <header className="topbar">
+        <div>
+          <p className="eyebrow">Personal Finance Workspace</p>
+          <h1>Quan ly chi tieu</h1>
+        </div>
+        <div className="topbar-actions">
+          <div className="top-pill">{transactions.length} giao dich</div>
+          <div className="top-pill">{monthly.year}</div>
+        </div>
+      </header>
+
+      <section className="hero">
         <div className="dashboard-cards">
           <article className="stat-card income">
-            <span>Total Income</span>
+            <span>Tong thu</span>
             <strong>{formatCurrency(summary.totalIncome)}</strong>
           </article>
           <article className="stat-card expense">
-            <span>Total Expense</span>
+            <span>Tong chi</span>
             <strong>{formatCurrency(summary.totalExpense)}</strong>
           </article>
           <article className="stat-card balance">
-            <span>Balance</span>
+            <span>So du</span>
             <strong>{formatCurrency(summary.balance)}</strong>
           </article>
         </div>
@@ -184,173 +201,191 @@ function App() {
 
       {error ? <p className="error">{error}</p> : null}
 
-      <section className="card card-split">
-        <div className="card-pane">
-          <h2 className="section-title">Create Transaction</h2>
-          <form className="form" onSubmit={onSubmit}>
-            <select
-              value={form.type}
-              onChange={(e) => setForm((prev) => ({ ...prev, type: e.target.value }))}
-            >
-              <option value="INCOME">Income</option>
-              <option value="EXPENSE">Expense</option>
-            </select>
-            <input
-              type="number"
-              min="0.01"
-              step="0.01"
-              placeholder="Amount"
-              value={form.amount}
-              onChange={(e) => setForm((prev) => ({ ...prev, amount: e.target.value }))}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Category (e.g. FOOD)"
-              value={form.category}
-              onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Description"
-              value={form.description}
-              onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-              required
-            />
-            <button type="submit">Add Transaction</button>
-          </form>
-        </div>
+      <section className="workspace-grid">
+        <div className="workspace-left">
+          <section className="card card-split">
+            <div className="card-pane">
+              <h2 className="section-title">Them giao dich</h2>
+              <form className="form" onSubmit={onSubmit}>
+                <select
+                  value={form.type}
+                  onChange={(e) => setForm((prev) => ({ ...prev, type: e.target.value }))}
+                >
+                  <option value="INCOME">Thu</option>
+                  <option value="EXPENSE">Chi</option>
+                </select>
+                <input
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="So tien"
+                  value={form.amount}
+                  onChange={(e) => setForm((prev) => ({ ...prev, amount: e.target.value }))}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Danh muc (VD: AN_UONG)"
+                  value={form.category}
+                  onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Mo ta"
+                  value={form.description}
+                  onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                  required
+                />
+                <button type="submit">Them giao dich</button>
+              </form>
+            </div>
 
-        <div className="card-pane">
-          <h2 className="section-title">Filters</h2>
-          <form className="filter-form" onSubmit={onApplyFilters}>
-            <select
-              value={filters.type}
-              onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value }))}
-            >
-              <option value="ALL">All Types</option>
-              <option value="INCOME">Income</option>
-              <option value="EXPENSE">Expense</option>
-            </select>
-            <input
-              type="text"
-              placeholder="Category"
-              value={filters.category}
-              onChange={(e) => setFilters((prev) => ({ ...prev, category: e.target.value }))}
-            />
-            <input
-              type="date"
-              value={filters.startDate}
-              onChange={(e) => setFilters((prev) => ({ ...prev, startDate: e.target.value }))}
-            />
-            <input
-              type="date"
-              value={filters.endDate}
-              onChange={(e) => setFilters((prev) => ({ ...prev, endDate: e.target.value }))}
-            />
-            <button type="submit">Apply Filters</button>
-            <button type="button" className="secondary" onClick={onResetFilters}>
-              Reset
-            </button>
-          </form>
-        </div>
-      </section>
-
-      <section className="card summary-card">
-        <h2 className="section-title">Summary</h2>
-        <div className="summary-grid">
-          <div>
-            <span className="summary-label">Income</span>
-            <strong>{formatCurrency(summary.totalIncome)}</strong>
-          </div>
-          <div>
-            <span className="summary-label">Expense</span>
-            <strong>{formatCurrency(summary.totalExpense)}</strong>
-          </div>
-          <div>
-            <span className="summary-label">Balance</span>
-            <strong>{formatCurrency(summary.balance)}</strong>
-          </div>
-        </div>
-      </section>
-
-      <section className="card monthly-card">
-        <div className="section-row">
-          <div>
-            <h2 className="section-title">Monthly Summary</h2>
-            <p className="section-text">Visualize income and expense trends for the selected year.</p>
-          </div>
-          <label className="year-field">
-            Year
-            <input
-              id="year"
-              type="number"
-              min="2000"
-              max="2100"
-              value={yearInput}
-              onChange={onChangeYearInput}
-              onBlur={onApplyYear}
-            />
-          </label>
-        </div>
-        <div className="chart-wrapper">
-          {monthly.data.length === 0 ? (
-            <p className="empty-state">No monthly summary available yet.</p>
-          ) : (
-            monthly.data.map((item) => {
-              const maxValue = Math.max(...monthly.data.map((row) => Math.max(row.totalIncome, row.totalExpense)), 1);
-              const incomeWidth = `${Math.round((item.totalIncome / maxValue) * 100)}%`;
-              const expenseWidth = `${Math.round((item.totalExpense / maxValue) * 100)}%`;
-
-              return (
-                <div key={item.month} className="bar-row">
-                  <div className="bar-label">
-                    <strong>{item.month}</strong>
-                    <span>{formatCurrency(item.balance)}</span>
-                  </div>
-                  <div className="bar-track">
-                    <span className="bar bar-income" style={{ width: incomeWidth }} />
-                    <span className="bar bar-expense" style={{ width: expenseWidth }} />
-                  </div>
-                  <div className="bar-values">
-                    <span>{formatCurrency(item.totalIncome)}</span>
-                    <span>{formatCurrency(item.totalExpense)}</span>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </section>
-
-      <section className="card transactions-card">
-        <div className="section-row">
-          <h2 className="section-title">Transactions</h2>
-          <span className="transaction-count">{transactions.length} items</span>
-        </div>
-        {transactions.length === 0 ? (
-          <p className="empty-state">No transactions yet. Add one to get started.</p>
-        ) : (
-          <ul className="list">
-            {transactions.map((item) => (
-              <li key={item.id} className={`item transaction-${item.type.toLowerCase()}`}>
-                <div>
-                  <div className="transaction-header">
-                    <strong>{item.description}</strong>
-                    <span className={badgeClass(item.type)}>{item.type}</span>
-                  </div>
-                  <p>
-                    {item.category} • {formatCurrency(item.amount)}
-                  </p>
-                </div>
-                <button type="button" onClick={() => onDelete(item.id)}>
-                  Delete
+            <div className="card-pane">
+              <h2 className="section-title">Bo loc</h2>
+              <form className="filter-form" onSubmit={onApplyFilters}>
+                <select
+                  value={filters.type}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value }))}
+                >
+                  <option value="ALL">Tat ca loai</option>
+                  <option value="INCOME">Thu</option>
+                  <option value="EXPENSE">Chi</option>
+                </select>
+                <input
+                  type="text"
+                  placeholder="Danh muc"
+                  value={filters.category}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, category: e.target.value }))}
+                />
+                <input
+                  type="date"
+                  value={filters.startDate}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, startDate: e.target.value }))}
+                />
+                <input
+                  type="date"
+                  value={filters.endDate}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, endDate: e.target.value }))}
+                />
+                <button type="submit">Ap dung loc</button>
+                <button type="button" className="secondary" onClick={onResetFilters}>
+                  Dat lai
                 </button>
-              </li>
-            ))}
-          </ul>
-        )}
+              </form>
+            </div>
+          </section>
+
+          <section className="card transactions-card">
+            <div className="section-row">
+              <h2 className="section-title">Danh sach giao dich</h2>
+              <span className="transaction-count">{transactions.length} muc</span>
+            </div>
+            <div className="transaction-meta">
+              <span>Thu: {incomeCount}</span>
+              <span>Chi: {expenseCount}</span>
+            </div>
+            {transactions.length === 0 ? (
+              <p className="empty-state">Chua co giao dich nao. Hay them giao dich dau tien.</p>
+            ) : (
+              <ul className="list">
+                {transactions.map((item) => (
+                  <li key={item.id} className={`item transaction-${item.type.toLowerCase()}`}>
+                    <div>
+                      <div className="transaction-header">
+                        <strong>{item.description}</strong>
+                        <span className={badgeClass(item.type)}>{item.type}</span>
+                      </div>
+                      <p>
+                        {item.category} • {formatCurrency(item.amount)}
+                      </p>
+                    </div>
+                    <button type="button" onClick={() => onDelete(item.id)}>
+                      Xoa
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+
+        <aside className="workspace-right">
+          <section className="card summary-card">
+            <h2 className="section-title">Tong quan</h2>
+            <div className="summary-grid">
+              <div>
+                <span className="summary-label">Thu</span>
+                <strong>{formatCurrency(summary.totalIncome)}</strong>
+              </div>
+              <div>
+                <span className="summary-label">Chi</span>
+                <strong>{formatCurrency(summary.totalExpense)}</strong>
+              </div>
+              <div>
+                <span className="summary-label">So du</span>
+                <strong className={sectionAmountClass(summary.balance)}>{formatCurrency(summary.balance)}</strong>
+              </div>
+            </div>
+          </section>
+
+          <section className="card monthly-card">
+            <div className="section-row">
+              <div>
+                <h2 className="section-title">Thong ke theo thang</h2>
+              </div>
+              <div className="year-controls">
+                <label className="year-field" htmlFor="year">
+                  Nam
+                </label>
+                <input
+                  id="year"
+                  className="year-input"
+                  type="number"
+                  min="2000"
+                  max="2100"
+                  value={yearInput}
+                  onChange={onChangeYearInput}
+                  onBlur={onApplyYear}
+                />
+                <button type="button" className="year-apply" onClick={onApplyYear}>
+                  Xem
+                </button>
+              </div>
+            </div>
+            <div className="chart-wrapper">
+              {monthly.data.length === 0 ? (
+                <p className="empty-state">Chua co du lieu thong ke theo thang.</p>
+              ) : (
+                monthly.data.map((item) => {
+                  const maxValue = Math.max(
+                    ...monthly.data.map((row) => Math.max(row.totalIncome, row.totalExpense)),
+                    1
+                  );
+                  const incomeWidth = `${Math.round((item.totalIncome / maxValue) * 100)}%`;
+                  const expenseWidth = `${Math.round((item.totalExpense / maxValue) * 100)}%`;
+
+                  return (
+                    <div key={item.month} className="bar-row">
+                      <div className="bar-label">
+                        <strong>{item.month}</strong>
+                        <span>{formatCurrency(item.balance)}</span>
+                      </div>
+                      <div className="bar-track">
+                        <span className="bar bar-income" style={{ width: incomeWidth }} />
+                        <span className="bar bar-expense" style={{ width: expenseWidth }} />
+                      </div>
+                      <div className="bar-values">
+                        <span>{formatCurrency(item.totalIncome)}</span>
+                        <span>{formatCurrency(item.totalExpense)}</span>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </section>
+        </aside>
       </section>
     </main>
   );

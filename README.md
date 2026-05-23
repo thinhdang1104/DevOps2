@@ -72,6 +72,38 @@ Set frontend env var:
 
 Then trigger a redeploy of frontend service.
 
+## Production Verification Checklist (Required)
+Use this checklist after deploy to prove the system works end to end.
+
+1. Health check is up
+   - Open: https://<your-backend-service>.onrender.com/api/health
+   - Expected JSON contains: {"ok": true}
+
+2. API CRUD flow works
+   - Create transaction (POST /api/transactions)
+   - Read list (GET /api/transactions)
+   - Read summary (GET /api/transactions/summary)
+   - Delete one transaction (DELETE /api/transactions/:id)
+
+3. Frontend to backend integration is correct
+   - Open frontend URL and verify API Status shows Online
+   - Add one transaction on UI and confirm it appears in list
+   - Verify total income/expense/balance updates immediately
+
+4. Database connection is stable
+   - Backend logs must not show DB connection errors
+   - Data remains after service restart
+
+5. CI status is green
+   - Latest GitHub Actions run passes install, lint, test, build for backend and frontend
+
+### Submission Evidence
+Capture and attach these artifacts for final submission:
+- Screenshot of /api/health response
+- Screenshot of frontend with at least one real transaction
+- Screenshot of CI workflow success
+- Short incident notes for at least 2 production issues and fixes
+
 ## Incident Report Template (Required)
 For each incident, record:
 - Symptom
