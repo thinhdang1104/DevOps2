@@ -43,26 +43,35 @@ function badgeClass(type) {
   return type === "INCOME" ? "badge badge-income" : "badge badge-expense";
 }
 
+function isValidYear(value) {
+  const year = Number(value);
+  return Number.isInteger(year) && year >= 2000 && year <= 2100;
+}
+
 function App() {
+  const currentYear = new Date().getFullYear();
   const [health, setHealth] = useState("checking");
   const [transactions, setTransactions] = useState([]);
   const [summary, setSummary] = useState({ totalIncome: 0, totalExpense: 0, balance: 0 });
-  const [monthly, setMonthly] = useState({ year: new Date().getFullYear(), data: [] });
+  const [monthly, setMonthly] = useState({ year: currentYear, data: [] });
+  const [yearInput, setYearInput] = useState(String(currentYear));
   const [filters, setFilters] = useState(initialFilters);
   const [form, setForm] = useState(initialForm);
   const [error, setError] = useState("");
 
   async function refreshData(activeFilters = filters) {
+    const targetYear = isValidYear(yearInput) ? Number(yearInput) : currentYear;
     const apiFilters = toApiFilters(activeFilters);
     const [tx, sum, monthlyResult] = await Promise.all([
       getTransactions(apiFilters),
       getSummary(apiFilters),
-      getMonthlySummary(monthly.year)
+      getMonthlySummary(targetYear)
     ]);
 
     setTransactions(tx);
     setSummary(sum);
     setMonthly(monthlyResult);
+    setYearInput(String(monthlyResult.year));
   }
 
   useEffect(() => {
@@ -118,10 +127,23 @@ function App() {
     }
   }
 
-  async function onChangeYear(event) {
-    const selectedYear = Number(event.target.value);
-    const nextMonthly = await getMonthlySummary(selectedYear);
-    setMonthly(nextMonthly);
+  function onChangeYearInput(event) {
+    setYearInput(event.target.value);
+  }
+
+  async function onApplyYear() {
+    setError("");
+    if (!isValidYear(yearInput)) {
+      setError("Year must be from 2000 to 2100");
+      return;
+    }
+
+    try {
+      const nextMonthly = await getMonthlySummary(Number(yearInput));
+      setMonthly(nextMonthly);
+    } catch (e) {
+      setError(e.message);
+    }
   }
 
   async function onDelete(id) {
@@ -266,8 +288,9 @@ function App() {
               type="number"
               min="2000"
               max="2100"
-              defaultValue={monthly.year}
-              onBlur={onChangeYear}
+              value={yearInput}
+              onChange={onChangeYearInput}
+              onBlur={onApplyYear}
             />
           </label>
         </div>

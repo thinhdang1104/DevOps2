@@ -16,8 +16,8 @@ function buildFilters(query) {
   }
 
   if (query.category) {
-    clauses.push("category = ?");
-    params.push(String(query.category).trim());
+    clauses.push("UPPER(category) = ?");
+    params.push(String(query.category).trim().toUpperCase());
   }
 
   if (query.startDate) {
