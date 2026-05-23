@@ -408,10 +408,6 @@ body::before {
   transform: translateY(-1px);
 }
 
-.item button:hover {
-  background: #fecaca;
-}
-
 .empty-state {
   margin: 0;
   padding: 22px 0;
