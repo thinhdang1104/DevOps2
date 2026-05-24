@@ -58,6 +58,21 @@ export async function createTransaction(payload) {
   return response.json();
 }
 
+export async function updateTransaction(id, payload) {
+  const response = await fetch(`${API_BASE}/transactions/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Cannot update transaction");
+  }
+
+  return response.json();
+}
+
 export async function deleteTransaction(id) {
   const response = await fetch(`${API_BASE}/transactions/${id}`, {
     method: "DELETE"
