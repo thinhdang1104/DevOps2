@@ -155,6 +155,54 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+router.put("/:id", async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({ message: "invalid id" });
+    }
+
+    const { type, amount, description, category } = req.body;
+
+    if (!["INCOME", "EXPENSE"].includes(type)) {
+      return res.status(400).json({ message: "type must be INCOME or EXPENSE" });
+    }
+
+    if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
+      return res.status(400).json({ message: "amount must be a positive number" });
+    }
+
+    if (!description || String(description).trim().length === 0) {
+      return res.status(400).json({ message: "description is required" });
+    }
+
+    const safeCategory = String(category || "GENERAL").trim().toUpperCase();
+    if (safeCategory.length === 0 || safeCategory.length > 50) {
+      return res.status(400).json({ message: "category must be 1-50 characters" });
+    }
+
+    const [result] = await pool.query(
+      `UPDATE transactions
+       SET type = ?, amount = ?, category = ?, description = ?
+       WHERE id = ?`,
+      [type, amount, safeCategory, description.trim(), id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "transaction not found" });
+    }
+
+    const [rows] = await pool.query(
+      "SELECT id, type, amount, category, description, created_at FROM transactions WHERE id = ?",
+      [id]
+    );
+
+    return res.json(rows[0]);
+  } catch (error) {
+    return next(error);
+  }
+});
+
 router.delete("/:id", async (req, res, next) => {
   try {
     const id = Number(req.params.id);

@@ -5,7 +5,8 @@ import {
   getHealth,
   getMonthlySummary,
   getSummary,
-  getTransactions
+  getTransactions,
+  updateTransaction
 } from "./api";
 
 const initialForm = {
@@ -63,6 +64,8 @@ function App() {
   const [yearInput, setYearInput] = useState(String(currentYear));
   const [filters, setFilters] = useState(initialFilters);
   const [form, setForm] = useState(initialForm);
+  const [editingId, setEditingId] = useState(null);
+  const [editingForm, setEditingForm] = useState(initialForm);
   const [error, setError] = useState("");
 
   const incomeCount = transactions.filter((item) => item.type === "INCOME").length;
@@ -162,6 +165,39 @@ function App() {
     setError("");
     try {
       await deleteTransaction(id);
+      await refreshData();
+    } catch (e) {
+      setError(e.message);
+    }
+  }
+
+  function onStartEdit(item) {
+    setError("");
+    setEditingId(item.id);
+    setEditingForm({
+      type: item.type,
+      amount: String(item.amount),
+      category: item.category,
+      description: item.description
+    });
+  }
+
+  function onCancelEdit() {
+    setEditingId(null);
+    setEditingForm(initialForm);
+  }
+
+  async function onSaveEdit(id) {
+    setError("");
+    try {
+      await updateTransaction(id, {
+        type: editingForm.type,
+        amount: Number(editingForm.amount),
+        category: editingForm.category,
+        description: editingForm.description
+      });
+      setEditingId(null);
+      setEditingForm(initialForm);
       await refreshData();
     } catch (e) {
       setError(e.message);
@@ -294,18 +330,87 @@ function App() {
               <ul className="list">
                 {transactions.map((item) => (
                   <li key={item.id} className={`item transaction-${item.type.toLowerCase()}`}>
-                    <div>
-                      <div className="transaction-header">
-                        <strong>{item.description}</strong>
-                        <span className={badgeClass(item.type)}>{item.type}</span>
-                      </div>
-                      <p>
-                        {item.category} • {formatCurrency(item.amount)}
-                      </p>
-                    </div>
-                    <button type="button" onClick={() => onDelete(item.id)}>
-                      {"X\u00f3a"}
-                    </button>
+                    {editingId === item.id ? (
+                      <>
+                        <div className="edit-grid">
+                          <select
+                            value={editingForm.type}
+                            onChange={(e) =>
+                              setEditingForm((prev) => ({ ...prev, type: e.target.value }))
+                            }
+                          >
+                            <option value="INCOME">Thu</option>
+                            <option value="EXPENSE">Chi</option>
+                          </select>
+                          <input
+                            type="number"
+                            min="0.01"
+                            step="0.01"
+                            value={editingForm.amount}
+                            onChange={(e) =>
+                              setEditingForm((prev) => ({ ...prev, amount: e.target.value }))
+                            }
+                            required
+                          />
+                          <input
+                            type="text"
+                            value={editingForm.category}
+                            onChange={(e) =>
+                              setEditingForm((prev) => ({ ...prev, category: e.target.value }))
+                            }
+                            required
+                          />
+                          <input
+                            type="text"
+                            value={editingForm.description}
+                            onChange={(e) =>
+                              setEditingForm((prev) => ({ ...prev, description: e.target.value }))
+                            }
+                            required
+                          />
+                        </div>
+                        <div className="item-actions">
+                          <button
+                            type="button"
+                            className="item-button-save"
+                            onClick={() => onSaveEdit(item.id)}
+                          >
+                            {"L\u01b0u"}
+                          </button>
+                          <button type="button" className="item-button-cancel" onClick={onCancelEdit}>
+                            {"H\u1ee7y"}
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <div className="transaction-header">
+                            <strong>{item.description}</strong>
+                            <span className={badgeClass(item.type)}>{item.type}</span>
+                          </div>
+                          <p>
+                            {item.category} • {formatCurrency(item.amount)}
+                          </p>
+                        </div>
+                        <div className="item-actions">
+                          <button
+                            type="button"
+                            className="item-button-edit"
+                            onClick={() => onStartEdit(item)}
+                          >
+                            {"S\u1eeda"}
+                          </button>
+                          <button
+                            type="button"
+                            className="item-button-delete"
+                            onClick={() => onDelete(item.id)}
+                          >
+                            {"X\u00f3a"}
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>
