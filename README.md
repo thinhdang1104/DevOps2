@@ -1,118 +1,68 @@
-# Expense Tracker - DevOps Project
+# Expense Tracker – Full-Stack & DevOps CI/CD Project
 
 ## Architecture
-- Frontend: React + Vite
-- Backend: Node.js + Express
-- Database: MySQL
-
-## Mandatory Endpoint
-- GET /api/health returns { "ok": true }
+- **Frontend:** React + Vite (served via Nginx in production container)
+- **Backend:** Node.js + Express REST API
+- **Database:** MySQL 8.4
+- **Infrastructure & CI/CD:** Docker, Docker Compose (with container healthchecks), GitHub Actions CI, Render Blueprint (`render.yaml`)
 
 ## Main Features
-- Add income or expense transaction
-- List transactions
-- Delete transaction
-- View totals and balance
+- Add income or expense transactions
+- Edit and delete transactions with real-time summary recalculation
+- View total income, total expenses, and current balance
+- Health check endpoint (`GET /api/health` returning `{"ok": true}`)
+
+---
 
 ## Run Local Without Docker
-1. Backend
-   - cd backend
-   - npm install
-   - npm run dev
-2. Frontend
-   - cd frontend
-   - npm install
-   - npm run dev
+1. **Backend:**
+   ```bash
+   cd backend
+   npm install
+   npm run dev
+   ```
+2. **Frontend:**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-## Run With Docker (Required)
-1. Copy environment file
-   - Copy-Item .env.example .env -Force
-2. Build and start
-   - docker compose up -d --build
-3. Check running containers
-   - docker compose ps
-4. Check logs
-   - docker compose logs --tail 50 backend
-   - docker compose logs --tail 50 frontend
-   - docker compose logs --tail 50 db
+---
 
-### URLs
-- Frontend: http://localhost:8080
-- Backend health: http://localhost:3000/api/health
-- MySQL: localhost:3307
+## Run With Docker Compose
+1. Copy environment file:
+   ```powershell
+   Copy-Item .env.example .env -Force
+   ```
+2. Build and start all containers:
+   ```bash
+   docker compose up -d --build
+   ```
+3. Check running containers and logs:
+   ```bash
+   docker compose ps
+   docker compose logs --tail 50 backend
+   ```
 
-## CI
-GitHub Actions pipeline runs on push and pull request.
-- install dependencies
-- lint
-- test
-- build
+### Service URLs
+- **Frontend (Nginx):** http://localhost:8080
+- **Backend Health Check:** http://localhost:3000/api/health
+- **MySQL Database:** `localhost:3307`
 
-Workflow file: .github/workflows/ci.yml
+---
 
-## Deploy Production On Render
-This repo includes render.yaml for one-click blueprint deploy.
-For MySQL on Render, use an external MySQL provider and set DATABASE_URL manually.
+## Continuous Integration (GitHub Actions)
+The automated CI pipeline (`.github/workflows/ci.yml`) runs on every `push` and `pull_request` across both `backend` and `frontend`:
+- Install dependencies (`npm ci` with npm cache)
+- Code linting (`npm run lint`)
+- Automated tests (`npm run test`)
+- Production build verification (`npm run build`)
 
-### A. Deploy backend + frontend
-1. Go to Render dashboard
-2. New + -> Blueprint
-3. Connect GitHub repo: thinhdang1104/DevOps2
-4. Select branch: main
-5. Deploy blueprint
+---
 
-### B. Set backend DATABASE_URL (MySQL)
-Use MySQL connection string format:
-- mysql://<user>:<password>@<host>:3306/<database>
-
-### C. Update frontend API URL after first deploy
-After backend service is created, copy backend public URL.
-Set frontend env var:
-- VITE_API_BASE_URL = https://<your-backend-service>.onrender.com/api
-
-Then trigger a redeploy of frontend service.
-
-## Production Verification Checklist (Required)
-Use this checklist after deploy to prove the system works end to end.
-
-1. Health check is up
-   - Open: https://<your-backend-service>.onrender.com/api/health
-   - Expected JSON contains: {"ok": true}
-
-2. API CRUD flow works
-   - Create transaction (POST /api/transactions)
-   - Read list (GET /api/transactions)
-   - Read summary (GET /api/transactions/summary)
-   - Delete one transaction (DELETE /api/transactions/:id)
-
-3. Frontend to backend integration is correct
-   - Open frontend URL and verify API Status shows Online
-   - Add one transaction on UI and confirm it appears in list
-   - Verify total income/expense/balance updates immediately
-
-4. Database connection is stable
-   - Backend logs must not show DB connection errors
-   - Data remains after service restart
-
-5. CI status is green
-   - Latest GitHub Actions run passes install, lint, test, build for backend and frontend
-
-### Submission Evidence
-Capture and attach these artifacts for final submission:
-- Screenshot of /api/health response
-- Screenshot of frontend with at least one real transaction
-- Screenshot of CI workflow success
-- Short incident notes for at least 2 production issues and fixes
-
-## Incident Report Template (Required)
-For each incident, record:
-- Symptom
-- Error layer (L4/L3/L2/L1)
-- Root cause
-- Fix
-- Prevention
-
-## Suggested 3 Incidents
-1. Wrong DATABASE_URL causes backend 500
-2. Wrong VITE_API_BASE_URL causes frontend fetch error
-3. Missing CORS configuration causes blocked browser request
+## Cloud Deployment (Render Blueprint)
+This repository includes a declarative `render.yaml` blueprint for automated deployment on Render:
+1. Connect GitHub repository `thinhdang1104/DevOps2` in Render Blueprint dashboard.
+2. Configure `DATABASE_URL` (`mysql://<user>:<password>@<host>:3306/<database>`) on the backend service.
+3. Set `VITE_API_BASE_URL` on the frontend service to point to the deployed backend API URL.
